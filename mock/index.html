@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // 静态路由:无论用户是什么权限，都可以直接访问到的路由：login、404、数据大屏、首页（无论什么权限都可以访问）
+        const routes = [
+            {
+                path: '/',
+                component: () => import('../layout/index.vue'),
+                name: 'layout',
+                redirect: '/home',
+                meta: {
+                    title: '',
+                    icon: ''
+                },
+                children: [
+                    {
+                        path: '/home',
+                        name: 'Home',
+                        component: () => import('../views/home/Home.vue'),
+                        meta: {
+                            title: '首页',
+                            hidden: false,
+                            icon: 'HomeFilled'
+                        }
+                    },
+
+
+                ]
+
+            },
+            {
+                path: '/login',
+                name: 'Login',
+                component: () => import('../views/login/Login.vue'),
+                meta: {
+                    title: '登录',
+                    hidden: true,
+                    icon: 'Promotion'//菜单左侧图标,支持ele plus 的所有图标
+                }
+            },
+            {
+                path: '/screen',
+                name: 'Screen',
+                component: () => import('../views/Screen/Screen.vue'),
+                meta: {
+                    title: '数据大屏',
+                    hidden: false,
+                    icon: 'Promotion'//菜单左侧图标,支持ele plus 的所有图标
+                }
+            },
+
+        ]
+        // 异步路由：根据用户不同的权限，能访问的菜单也不同:权限管理、商品管理以及他们的子路由
+        let asyncRoute = [
+            {
+                path: '/auth',
+                component: () => import('../layout/index.vue'),
+                name: 'Acl',
+                redirect: '/auth/userManage',
+                meta: {
+                    title: '权限管理',
+                    hidden: false,
+                    icon: 'Lock'//菜单左侧图标,支持ele plus 的所有图标
+                },
+                children: [
+                    {
+                        path: '/auth/userManage',
+                        name: 'User',
+                        component: () => import('../views/auth/children/UserManage.vue'),
+                        meta: {
+                            title: '用户管理',
+                            hidden: false,
+                            icon: 'Headset'//菜单左侧图标,支持ele plus 的所有图标
+                        }
+                    },
+                    {
+                        path: '/auth/roleManage',
+                        name: 'Role',
+                        component: () => import('../views/auth/children/RoleManage.vue'),
+                        meta: {
+                            title: '角色管理',
+                            hidden: false,
+                            icon: 'OfficeBuilding'//菜单左侧图标,支持ele plus 的所有图标
+                        }
+                    },
+                    {
+                        path: '/auth/menuManage',
+                        name: 'Permission',
+                        component: () => import('../views/auth/children/MenuManage.vue'),
+                        meta: {
+                            title: '菜单管理',
+                            hidden: false,
+                            icon: 'Mug'//菜单左侧图标,支持ele plus 的所有图标
+                        }
+                    },
+                ]
+            },
+            {
+                path: '/goodsManage',
+                component: () => import('../layout/index.vue'),
+                name: 'Product',
+                meta: {
+                    title: '商品管理',
+                    hidden: false,
+                    icon: 'Lock'//菜单左侧图标,支持ele plus 的所有图标
+                },
+                redirect: '/goodsManage/attributeManage',
+                children: [
+                    {
+                        path: '/goodsManage/attributeManage',
+                        name: 'Attr',
+                        component: () => import('../views/goodsManage/children/AttributeManage.vue'),
+                        meta: {
+                            title: '属性管理',
+                            hidden: false,
+                            icon: 'Headset'//菜单左侧图标,支持ele plus 的所有图标
+                        }
+                    },
+                    {
+                        path: '/goodsManage/brandManage',
+                        name: 'Trademark',
+                        component: () => import('../views/goodsManage/children/BrandManage.vue'),
+                        meta: {
+                            title: '品牌管理',
+                            hidden: false,
+                            icon: 'OfficeBuilding'//菜单左侧图标,支持ele plus 的所有图标
+                        }
+                    },
+                    {
+                        path: '/goodsManage/skuManage',
+                        name: 'Sku',
+                        component: () => import('../views/goodsManage/children/SkuManage.vue'),
+                        meta: {
+                            title: 'sku管理',
+                            hidden: false,
+                            icon: 'OfficeBuilding'//菜单左侧图标,支持ele plus 的所有图标
+                        }
+                    },
+                    {
+                        path: '/goodsManage/spuManage',
+                        name: 'Spu',
+                        component: () => import('../views/goodsManage/children/SpuManage.vue'),
+                        meta: {
+                            title: 'spu管理',
+                            hidden: false,
+                            icon: 'OfficeBuilding'//菜单左侧图标,支持ele plus 的所有图标
+                        }
+                    },
+                ]
+            },
+        ]
+        // 任意路由：以上路由都没有匹配到才会访问的路由
+        const AnyRoute = [
+            {
+                path: '/:pathMatch(.*)*',
+                //动态导入
+                redirect: '/404',
+                name: 'Any',
+                meta: {
+                    title: '任意路由',
+                    hidden: true,
+                    icon: 'HomeFilled'
+                }
+            },
+        ]
+
+        // 过滤异步路由
+        let guigu333 = ['Product', 'Trademark', 'Sku']
+        function filterAsyncRoute(asyncRoute, routes) {
+            return asyncRoute.filter(item => {
+                if (routes.includes(item.name)) {
+                    if (item.children && item.children.length > 0) {
+                        item.children = filterAsyncRoute(item.children, routes)
+                    }
+                    return true
+                }
+            })
+        }
+        let a = filterAsyncRoute(asyncRoute, guigu333)
+        console.log([...routes, ...a, ...AnyRoute]);
+    </script>
+</body>
+
+</html>
